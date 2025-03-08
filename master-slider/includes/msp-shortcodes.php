@@ -1002,20 +1002,20 @@ function msp_masterslider_layer_shortcode( $atts, $content = null ) {
 	 	// if was linked image
 		if( ! empty( $link ) && 'true' != $use_action ) {
 
-				$layer_image = "\n\t".sprintf( '<img src="%s" data-src="%s" alt="%s" style="%s" %s %s %s %s />', $src_blank, $src, $alt, $style_size, $effect_attrs, $data_type, $data_parallax, $position_attrs )."\n";
-				$layer .= sprintf( '<a %s class="%s" href="%s" target="%s" %s >%s</a>', $id_attr, $wrapper_class, $link, $target, $rel_attr, $layer_image ). "\n";
+				$layer_image = "\n\t".sprintf( '<img src="%s" data-src="%s" alt="%s" style="%s" %s %s %s %s />', esc_url( $src_blank ), esc_url( $src ), esc_attr( $alt ), esc_attr( $style_size ), $effect_attrs, $data_type, $data_parallax, $position_attrs )."\n";
+				$layer .= sprintf( '<a %s class="%s" href="%s" target="%s" %s >%s</a>', $id_attr, esc_attr( $wrapper_class ), esc_url( $link ), esc_attr( $target ), $rel_attr, $layer_image ). "\n";
 
 		// or single image
 		} else {
 			$layer .= sprintf( '<img %s class="%s" src="%s" data-src="%s" alt="%s" style="%s" %s %s %s %s %s />',
-									 $id_attr, $wrapper_class, $src_blank, $src, $alt, $style_size, $effect_attrs, $common_attrs, $rel_attr, $data_action, $position_attrs )."\n";
+									 $id_attr, esc_attr( $wrapper_class ), esc_url( $src_blank ), esc_url( $src ), esc_attr( $alt ), esc_attr( $style_size ), $effect_attrs, $common_attrs, $rel_attr, $data_action, $position_attrs )."\n";
 		}
 
 	} elseif( 'button' == $type ) {
 
 		$layer_content = ! empty( $content ) ? do_shortcode( $content ) : '';
 	 	$layer = sprintf( '<a %s href="%s" target="%s" class="%s %s" %s %s %s %s %s >%s</a>',
-								 $id_attr, $link, $target, $wrapper_class, $btn_class, $effect_attrs, $common_attrs, $position_attrs, $rel_attr, $data_action, $layer_content )."\n";
+								 $id_attr, esc_url( $link ), esc_attr( $target ), esc_attr( $wrapper_class ), esc_attr( $btn_class ), $effect_attrs, $common_attrs, $position_attrs, $rel_attr, $data_action, $layer_content )."\n";
 
 	// if layer type was text, video or hotspot
 	} else {
@@ -1025,7 +1025,7 @@ function msp_masterslider_layer_shortcode( $atts, $content = null ) {
 		if( 'video' == $type ) {
 			// add cover image if src attr is set
 			if( ! empty( $src ) )
-				$layer_content .= sprintf( '<img src="%s" data-src="%s" alt="%s" />', $src_blank, $src, $alt );
+				$layer_content .= sprintf( '<img src="%s" data-src="%s" alt="%s" />', esc_url( $src_blank ), $src, $alt );
 			// add video iframe markup if video is set
 			if( ! empty( $video ) ){
 					$vid_width  = empty( $width  ) ? '460' : rtrim( $width , 'px' ) ;
@@ -1039,7 +1039,7 @@ function msp_masterslider_layer_shortcode( $atts, $content = null ) {
 		}
 
 		$layer = sprintf( '<div %s class="%s" style="%s" %s %s %s %s >%s</div>',
-								 $id_attr, $wrapper_class, $style_size, $data_link, $effect_attrs, $common_attrs, $position_attrs, $layer_content )."\n";
+								 $id_attr, esc_attr( $wrapper_class ), esc_attr( $style_size ), $data_link, $effect_attrs, $common_attrs, $position_attrs, $layer_content )."\n";
 	}
 
 	// end layer markup generation //////////////////////////////////////////

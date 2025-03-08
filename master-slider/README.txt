@@ -6,8 +6,8 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: slider, image slider, wordpress slider, video slider
 Requires PHP: 5.4
 Requires at least: 5.0
-Tested up to: 6.7.1
-Stable tag: 3.10.6
+Tested up to: 6.7.2
+Stable tag: 3.10.7
 
 Build SEO friendly sliders fast and easy with touch swipe navigation that works smoothly across all devices.
 
@@ -239,6 +239,11 @@ Bugs can be reported in our [support forums](http://wordpress.org/tags/master-sl
 
 
 == Changelog ==
+
+= 3.10.7 =
+= Version 3.10.7/ (08.03.2025) =
+- [Improvement]: Compatibility with WP 6.7.2 applied.
+- [Improvement]: Security vulnerability fixed.
 
 = 3.10.5 =
 = Version 3.10.5/ (14.12.2024) =
