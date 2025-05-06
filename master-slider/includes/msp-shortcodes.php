@@ -514,7 +514,7 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 								);
 } ?>
 				// slider setup
-				<?php echo esc_js( $instance_name ); ?>.setup("<?php echo $uid; ?>", {
+				<?php echo esc_js( $instance_name ); ?>.setup("<?php echo esc_attr($uid); ?>", {
 						width           : <?php echo (int)$width; ?>,
 						height          : <?php echo (int) $height; ?>,
 						minHeight       : <?php echo (int) $min_height; ?>,
