@@ -39,7 +39,7 @@ function msp_masterslider_pb_shortcode( $atts, $content = null ) {
 	extract( $mixed );
 
 	$wrapper_open_tag  = sprintf( '<div class="avt_masterslider_el %s" >', esc_attr( $class ) );
-	$the_title_tag     = empty( $title ) ? '' : sprintf( '<h2>%s</h2>', $title );
+	$the_title_tag     = empty( $title ) ? '' : sprintf( '<h2>%s</h2>', wp_kses_post( $title ) );
 	$wrapper_close_tag = '</div>';
 	$slider_markup     = get_masterslider( $id );
 	$output 		   = $wrapper_open_tag . $the_title_tag . $slider_markup . $wrapper_close_tag;
@@ -762,7 +762,7 @@ function msp_masterslider_slide_shortcode( $atts, $content = null ) {
 
 		$slide_content .= "\t".sprintf('<a href="%s" %s %s %s %s %s>%s</a>', $link, $att_link_target,
 		                               			$att_link_rel, $att_link_title, $att_link_class,
-		                               			$att_link_id, $title )."\n";
+		                               			$att_link_id, wp_kses_post( $title ) )."\n";
 	}
 
 	// add layers that passed as content
@@ -780,7 +780,7 @@ function msp_masterslider_slide_shortcode( $atts, $content = null ) {
 
 	// markup for thumb in tab
 	$tab_image   = empty( $tab_thumb ) ? '' : sprintf('<img class="ms-tab-thumb" src="%s" alt="%s" />', msp_get_the_absolute_media_url( $tab_thumb ), esc_attr( $alt ) )."\n";
-	$tab_context = empty( $tab )       ? '' : sprintf('<div class="ms-tab-context">%s</div>', str_replace( '&quote;', '"', wp_specialchars_decode( $tab ) ), $alt )."\n";
+	$tab_context = empty( $tab )       ? '' : sprintf('<div class="ms-tab-context">%s</div>', wp_kses_post( str_replace( '&quote;', '"', wp_specialchars_decode( $tab ) ), $alt ))."\n";
 
 	// tab markup
 	if( ! empty( $tab_image ) || ! empty( $tab_context ) ) {
