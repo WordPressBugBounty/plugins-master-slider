@@ -1030,7 +1030,7 @@ function msp_masterslider_layer_shortcode( $atts, $content = null ) {
 			if( ! empty( $video ) ){
 					$vid_width  = empty( $width  ) ? '460' : rtrim( $width , 'px' ) ;
 					$vid_height = empty( $height ) ? '270' : rtrim( $height, 'px' ) ;
-					$layer_content .= sprintf( '<iframe src="%s" width="%s" height="%s" > </iframe>', $video, $vid_width, $vid_height );
+					$layer_content .= sprintf( '<iframe src="%s" width="%s" height="%s" > </iframe>', esc_url( $video ), absint( $vid_width ), absint( $vid_height ) );
 			}
 
 		// add shortcode content if layer type was text or hotspot
@@ -1065,6 +1065,13 @@ function msp_masterslider_slide_info_shortcode( $atts, $content = null ) {
 		  , $atts, 'masterslider_slide_info' );
 
 	 extract( $args );
+
+	$tag_name = strtolower( wp_unslash( $tag_name ) );
+	
+	// allow only valid HTML tag pattern (letters + numbers)
+	if ( ! preg_match( '/^[a-z0-9]+$/', $tag_name ) ) {
+		$tag_name = 'div';
+	}
 
 	 $tag_name = strtolower( $tag_name ) == 'script' ? 'div' : $tag_name;
 

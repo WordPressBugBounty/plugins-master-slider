@@ -29,3 +29,78 @@ function msp_review_on_wordpress() {
 	</div>
 	<?php
 }
+
+add_filter( 'wp_insert_post_data', 'msp_sanitize_ms_slider_before_save',  10, 3 );
+function msp_sanitize_ms_slider_before_save( $data, $postarr, $unsanitized_postarr = null ) {
+
+	// Skip if user is admin
+    if (current_user_can('administrator')) {
+        return $data;
+    }
+
+	$js_events = [
+		'on_init',
+		'on_change_start',
+		'on_change_end',
+		'on_waiting',
+		'on_resize',
+		'on_video_play',
+		'on_video_close',
+		'on_swipe_start',
+		'on_swipe_move',
+		'on_swipe_end',
+	];
+
+    // Check and clean post content
+    if (!empty($data['post_content'])) {
+		$content = $data['post_content'];
+		$excerpt = $data['post_excerpt'];
+
+		foreach ( $js_events as $event ) {
+			if (preg_match('/\[ms_slider[^]]*' . $event . '=/i', $content)) {
+				$content = preg_replace('/\s*' . $event . '\s*=\s*[\\\"\']+[^\\\"\']*[\\\"\']+/i', '', $content);
+			}
+
+			if (preg_match('/\[ms_slider[^]]*' . $event . '=/i', $excerpt)) {
+				$excerpt = preg_replace('/\s*' . $event . '\s*=\s*[\\\"\']+[^\\\"\']*[\\\"\']+/i', '', $excerpt);
+			}
+		}
+
+        $data['post_content'] = $content;
+		$data['post_excerpt'] = $excerpt;
+    }
+
+
+
+    return $data;
+}
+
+add_action( 'save_post', 'msp_elementor_sanitize_ms_slider_before_save',  10, 3 );
+function msp_elementor_sanitize_ms_slider_before_save( $post_id, $post, $update ) {
+	$js_events = [
+		'on_init',
+		'on_change_start',
+		'on_change_end',
+		'on_waiting',
+		'on_resize',
+		'on_video_play',
+		'on_video_close',
+		'on_swipe_start',
+		'on_swipe_move',
+		'on_swipe_end',
+	];
+
+	$elementor_data = get_post_meta($post_id, '_elementor_data', true);
+	$elementor_modified = false;
+
+	foreach ( $js_events as $event ) {
+		if (!empty($elementor_data) && preg_match('/\[ms_slider[^]]*' . $event . '=/i', $elementor_data)) {
+			$elementor_data = preg_replace('//\s*' . $event . '\s*=\s*[\\\"\']+[^\\\"\']*[\\\"\']+/i', '', $elementor_data);
+			$elementor_modified = true;
+		}
+	}
+
+	if ( $elementor_modified ) {
+		update_post_meta($post_id, '_elementor_data', $elementor_data);
+	}
+}

@@ -11,13 +11,13 @@
  * Plugin Name:       Master Slider
  * Plugin URI:        https://wordpress.org/plugins/master-slider/
  * Description:       Master Slider is the most advanced responsive HTML5 WordPress slider plugin with touch swipe navigation that works smoothly on devices too.
- * Version:           3.11.0
+ * Version:           3.11.2
  * Author:            Averta
  * Author URI:        https://masterslider.com
  * Text Domain:       master-slider
  * License URI:       license.txt
  * Domain Path:       /languages
- * Tested up to: 	  6.8.2
+ * Tested up to: 	  6.9
  */
 
 // If this file is called directly, abort.
