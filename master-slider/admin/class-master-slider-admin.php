@@ -76,6 +76,7 @@ class Master_Slider_Admin {
       return;
     }
 
+    new MSP_Screen_Help();
     // Assign masterslider custom capabilities
     Master_Slider::assign_custom_caps();
     // Inject default styles and effects

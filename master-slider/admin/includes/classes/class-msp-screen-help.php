@@ -148,5 +148,3 @@ class MSP_Screen_Help extends Axiom_Screen_Help {
 }
 
 endif;
-
-new MSP_Screen_Help();

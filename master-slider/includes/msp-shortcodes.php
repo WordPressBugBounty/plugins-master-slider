@@ -523,7 +523,7 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 						grabCursor      : <?php msp_is_true_e($grab_cursor); ?>,
 						swipe           : <?php msp_is_true_e($swipe); ?>,
 						mouse           : <?php msp_is_true_e($mouse); ?>,
-						layout          : "<?php echo $layout; ?>",
+						layout          : "<?php echo htmlspecialchars($layout); ?>",
 						wheel           : <?php msp_is_true_e($wheel); ?>,
 						autoplay        : <?php msp_is_true_e($autoplay); ?>,
 						instantStartLayers:<?php msp_is_true_e( $instant_show_layers ); ?>,
@@ -535,17 +535,17 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 						smoothHeight    : <?php msp_is_true_e($smooth_height); ?>,
 						endPause        : <?php msp_is_true_e($end_pause); ?>,
 						overPause       : <?php msp_is_true_e($over_pause); ?>,
-						fillMode        : "<?php echo $fill_mode; ?>",
+						fillMode        : "<?php echo htmlspecialchars($fill_mode); ?>",
 						centerControls  : <?php msp_is_true_e($center_controls); ?>,
 						startOnAppear   : <?php msp_is_true_e($start_on_appear); ?>,
-						layersMode      : "<?php echo $layers_mode; ?>",
+						layersMode      : "<?php echo htmlspecialchars($layers_mode); ?>",
 						hideLayers      : <?php msp_is_true_e($hide_layers); ?>,
 						fullscreenMargin: <?php echo (int) $fullscreen_margin;  ?>,
 						speed           : <?php echo (int)$speed; ?>,
-						dir             : "<?php echo $direction; ?>",
+						dir             : "<?php echo htmlspecialchars($direction); ?>",
 <?php if( 'staff-3' == $template      ) { echo "viewOption      : { centerSpace:1.6 },\n"; } ?>
-<?php if( 'off'     != $parallax_mode ) { echo "\t\t\t\t\t\tparallaxMode    : '$parallax_mode',\n"; } ?>
-						view            : "<?php echo $view; ?>"
+<?php if( 'off'     != $parallax_mode ) { echo "\t\t\t\t\t\tparallaxMode    : '" . htmlspecialchars( $parallax_mode ) . "',\n"; } ?>
+						view            : "<?php echo htmlspecialchars($view); ?>"
 				});
 
 				<?php
