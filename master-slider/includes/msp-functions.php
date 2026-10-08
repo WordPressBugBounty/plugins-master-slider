@@ -110,7 +110,10 @@ function msp_get_ms_slider_shortcode_by_slider_id( $slider_id ){
  */
 function msp_generate_slider_output( $slider_id, $cache_output = false ){
     $ms_slider_shortcode = msp_get_ms_slider_shortcode_by_slider_id( $slider_id );
+    // Callbacks stored with the slider are authored in the slider editor.
+    msp_set_trusted_slider_render( true );
     $slider_output = do_shortcode( $ms_slider_shortcode );
+    msp_set_trusted_slider_render( false );
     if( $cache_output )
         msp_set_slider_transient( $slider_id, $slider_output );
 
@@ -1122,6 +1125,58 @@ function msp_is_true($value) {
 
 function msp_is_true_e( $value ) {
   echo msp_is_true( $value );
+}
+
+
+/**
+ * Mark the next ms_slider render as coming from stored slider data.
+ *
+ * @param bool $trusted
+ */
+function msp_set_trusted_slider_render( $trusted ) {
+    $GLOBALS['msp_trusted_slider_render'] = (bool) $trusted;
+}
+
+
+/**
+ * Read and clear the trusted-render flag so nested shortcodes do not inherit it.
+ *
+ * @return bool
+ */
+function msp_take_trusted_slider_render() {
+    $trusted = ! empty( $GLOBALS['msp_trusted_slider_render'] );
+    $GLOBALS['msp_trusted_slider_render'] = false;
+    return $trusted;
+}
+
+
+/**
+ * Integer that is safe to print as a raw JavaScript number.
+ *
+ * @param mixed $value
+ * @return string Empty when the value is not numeric.
+ */
+function msp_sanitize_js_int_token( $value ) {
+    if ( is_bool( $value ) || ! is_numeric( $value ) ) {
+        return '';
+    }
+    return (string) (int) $value;
+}
+
+
+/**
+ * Optional JavaScript object property, printed only for a numeric value.
+ *
+ * @param string $name  Fixed property name.
+ * @param mixed  $value User-supplied value.
+ * @return string
+ */
+function msp_js_int_prop( $name, $value ) {
+    $token = msp_sanitize_js_int_token( $value );
+    if ( '' === $token ) {
+        return '';
+    }
+    return sprintf( ', %s:%s', $name, $token );
 }
 
 

@@ -57,13 +57,8 @@ function msp_sanitize_ms_slider_before_save( $data, $postarr, $unsanitized_posta
 		$excerpt = $data['post_excerpt'];
 
 		foreach ( $js_events as $event ) {
-			if (preg_match('/\[ms_slider[^]]*' . $event . '=/i', $content)) {
-				$content = preg_replace('/\s*' . $event . '\s*=\s*[\\\"\']+[^\\\"\']*[\\\"\']+/i', '', $content);
-			}
-
-			if (preg_match('/\[ms_slider[^]]*' . $event . '=/i', $excerpt)) {
-				$excerpt = preg_replace('/\s*' . $event . '\s*=\s*[\\\"\']+[^\\\"\']*[\\\"\']+/i', '', $excerpt);
-			}
+			$content = msp_strip_ms_slider_callback_attr( $content, $event );
+			$excerpt = msp_strip_ms_slider_callback_attr( $excerpt, $event );
 		}
 
         $data['post_content'] = $content;
@@ -75,32 +70,23 @@ function msp_sanitize_ms_slider_before_save( $data, $postarr, $unsanitized_posta
     return $data;
 }
 
-add_action( 'save_post', 'msp_elementor_sanitize_ms_slider_before_save',  10, 3 );
-function msp_elementor_sanitize_ms_slider_before_save( $post_id, $post, $update ) {
-	$js_events = [
-		'on_init',
-		'on_change_start',
-		'on_change_end',
-		'on_waiting',
-		'on_resize',
-		'on_video_play',
-		'on_video_close',
-		'on_swipe_start',
-		'on_swipe_move',
-		'on_swipe_end',
-	];
-
-	$elementor_data = get_post_meta($post_id, '_elementor_data', true);
-	$elementor_modified = false;
-
-	foreach ( $js_events as $event ) {
-		if (!empty($elementor_data) && preg_match('/\[ms_slider[^]]*' . $event . '=/i', $elementor_data)) {
-			$elementor_data = preg_replace('//\s*' . $event . '\s*=\s*[\\\"\']+[^\\\"\']*[\\\"\']+/i', '', $elementor_data);
-			$elementor_modified = true;
-		}
+/**
+ * Remove one ms_slider callback attribute from post content.
+ *
+ * Rendering ignores these attributes unless the shortcode comes from the
+ * slider editor. This only keeps them out of stored post content.
+ *
+ * @param string $content Post content or excerpt.
+ * @param string $event   Callback attribute name.
+ * @return string
+ */
+function msp_strip_ms_slider_callback_attr( $content, $event ) {
+	if ( ! is_string( $content ) || '' === $content || ! preg_match( '/\[ms_slider\b/i', $content ) ) {
+		return $content;
 	}
 
-	if ( $elementor_modified ) {
-		update_post_meta($post_id, '_elementor_data', $elementor_data);
-	}
+	$pattern = '/\s*' . preg_quote( $event, '/' ) . '\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s\]]+)/i';
+	$updated = preg_replace( $pattern, '', $content );
+
+	return is_string( $updated ) ? $updated : $content;
 }

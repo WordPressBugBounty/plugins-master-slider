@@ -7,7 +7,7 @@ Tags: slider, image slider, wordpress slider, video slider
 Requires PHP: 5.4
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 3.11.3
+Stable tag: 3.11.5
 
 Build SEO friendly sliders fast and easy with touch swipe navigation that works smoothly across all devices.
 
@@ -239,6 +239,10 @@ Bugs can be reported in our [support forums](http://wordpress.org/tags/master-sl
 
 
 == Changelog ==
+
+= 3.11.5 =
+= Version 3.11.5/ (08.10.2026) =
+- [Improvement]: Fixed a security vulnerability (CVE-2026-14844)
 
 = 3.11.3 =
 = Version 3.11.3/ (05.10.2026) =

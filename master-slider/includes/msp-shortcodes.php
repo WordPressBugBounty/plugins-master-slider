@@ -246,13 +246,29 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 
 	 extract( $mixed );
 
+	 // Event callbacks are raw JavaScript. Only sliders authored in the slider
+	 // editor (or its preview) may print them. Shortcodes written into post
+	 // content never do, which blocks contributor stored XSS.
+	 if ( ! msp_take_trusted_slider_render() ) {
+		$on_init = '';
+		$on_change_start = '';
+		$on_change_end = '';
+		$on_waiting = '';
+		$on_resize = '';
+		$on_video_play = '';
+		$on_video_close = '';
+		$on_swipe_start = '';
+		$on_swipe_move = '';
+		$on_swipe_end = '';
+	 }
+
 	 // load masterslider script
 	 wp_enqueue_style ( 'masterslider-main');
 	 wp_enqueue_script( 'masterslider-core');
 	 wp_enqueue_script( 'prettyPhoto' );
 
 	// create an unique id for slider
-	$uid    = empty($uid ) ? uniqid("MS") : $uid;
+	$uid    = empty( $uid ) || ! preg_match( '/^[A-Za-z0-9_-]+$/', (string) $uid ) ? uniqid( 'MS' ) : $uid;
 	// unique id for parant wrapper
 	$puid   = 'P_' . $uid;
 
@@ -260,7 +276,13 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 	// class name for slider template
 	$template_class = empty( $template_class ) ? '' : esc_attr( $template_class );
 
-	$preload = is_numeric($preload) ? ( (int)$preload + 1 ) : "'$preload'";
+	if ( is_numeric( $preload ) ) {
+		$preload = (int) $preload + 1;
+	} elseif ( 'all' === $preload ) {
+		$preload = "'all'";
+	} else {
+		$preload = 0;
+	}
 
 
 	// add max-width to wrapper for boxed and partialview layout
@@ -279,21 +301,21 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 	}
 
 
-	$arrows_hideunder   = empty( $arrows_hideunder  ) ? '' : sprintf( ', hideUnder:%s', $arrows_hideunder  );
-	$bullets_hideunder  = empty( $bullets_hideunder ) ? '' : sprintf( ', hideUnder:%s', $bullets_hideunder );
-	$thumbs_hideunder   = empty( $thumbs_hideunder  ) ? '' : sprintf( ', hideUnder:%s', $thumbs_hideunder  );
-	$scroll_hideunder   = empty( $scroll_hideunder  ) ? '' : sprintf( ', hideUnder:%s', $scroll_hideunder  );
-	$timebar_hideunder  = empty( $timebar_hideunder ) ? '' : sprintf( ', hideUnder:%s', $timebar_hideunder );
-	$slideinfo_hideunder   = empty( $slideinfo_hideunder    ) ? '' : sprintf( ', hideUnder:%s', $slideinfo_hideunder   );
-	$circletimer_hideunder = empty( $circletimer_hideunder  ) ? '' : sprintf( ', hideUnder:%s', $circletimer_hideunder );
+	$arrows_hideunder      = msp_js_int_prop( 'hideUnder', $arrows_hideunder );
+	$bullets_hideunder     = msp_js_int_prop( 'hideUnder', $bullets_hideunder );
+	$thumbs_hideunder      = msp_js_int_prop( 'hideUnder', $thumbs_hideunder );
+	$scroll_hideunder      = msp_js_int_prop( 'hideUnder', $scroll_hideunder );
+	$timebar_hideunder     = msp_js_int_prop( 'hideUnder', $timebar_hideunder );
+	$slideinfo_hideunder   = msp_js_int_prop( 'hideUnder', $slideinfo_hideunder );
+	$circletimer_hideunder = msp_js_int_prop( 'hideUnder', $circletimer_hideunder );
 
-	$bullets_margin     = empty( $bullets_margin )    ? '' : sprintf( ', margin:%s', $bullets_margin     );
-	$circletimer_margin = empty( $circletimer_margin )? '' : sprintf( ', margin:%s', $circletimer_margin );
-	$scroll_margin      = empty( $scroll_margin )     ? '' : sprintf( ', margin:%s', $scroll_margin      );
-	$slideinfo_margin   = empty( $slideinfo_margin )  ? '' : sprintf( ', margin:%s', $slideinfo_margin   );
+	$bullets_margin     = msp_js_int_prop( 'margin', $bullets_margin );
+	$circletimer_margin = msp_js_int_prop( 'margin', $circletimer_margin );
+	$scroll_margin      = msp_js_int_prop( 'margin', $scroll_margin );
+	$slideinfo_margin   = msp_js_int_prop( 'margin', $slideinfo_margin );
 
-	$timebar_width      = empty( $timebar_width )     ? '' : sprintf( ', width:%s', $timebar_width );
-	$scroll_width       = empty( $scroll_width  )     ? '' : sprintf( ', width:%s', $scroll_width );
+	$timebar_width      = msp_js_int_prop( 'width', $timebar_width );
+	$scroll_width       = msp_js_int_prop( 'width', $scroll_width );
 
 
 	if ( in_array( $bullets_align, array('left', 'right') ) )
@@ -316,18 +338,26 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 	if ( in_array( $slideinfo_align, array('top', 'bottom') ) )
 		$slideinfo_direction = 'h';
 
+	$slideinfo_width  = msp_sanitize_js_int_token( $slideinfo_width );
+	$slideinfo_height = msp_sanitize_js_int_token( $slideinfo_height );
+
 	// set slideinfo size to spefified height is direction is horizontal, else set it to width
-	if( empty( $slideinfo_width ) && empty( $slideinfo_height ) ) {
+	if( '' === $slideinfo_width && '' === $slideinfo_height ) {
 		$slideinfo_size = '';
-	} elseif( 'h' == $slideinfo_direction ){
+	} elseif( 'h' == $slideinfo_direction && '' !== $slideinfo_height ){
 		$slideinfo_size = sprintf( ', size:%s', $slideinfo_height );
-	} else {
+	} elseif( '' !== $slideinfo_width ) {
 		$slideinfo_size = sprintf( ', size:%s', $slideinfo_width );
+	} else {
+		$slideinfo_size = '';
 	}
 
-	$instance_suffix = substr($uid, -4);
+	$instance_suffix = substr( preg_replace( '/[^A-Za-z0-9]/', '', (string) $uid ), -4 );
+	if ( '' === $instance_suffix ) {
+		$instance_suffix = substr( uniqid(), -4 );
+	}
 	// slider javascript instance name
-	$instance_name = "masterslider_".$instance_suffix;
+	$instance_name = 'masterslider_' . $instance_suffix;
 
 	// stores inner markup for some spesific templates
 	$inner_template_container_open_tags  = '';
@@ -386,6 +416,21 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 
 	$inner_template_container_open_tags  = apply_filters( 'masterslider_ms_slider_inner_template_container_open_tags' , $inner_template_container_open_tags , $template, $mixed );
 	$inner_template_container_close_tags = apply_filters( 'masterslider_ms_slider_inner_template_container_close_tags', $inner_template_container_close_tags, $template, $mixed );
+
+	// Values printed inside the inline script. esc_js() keeps them inside JS strings.
+	$js_string_vars = array(
+		'layout', 'fill_mode', 'layers_mode', 'direction', 'view', 'parallax_mode',
+		'bullets_direction', 'bullets_align',
+		'thumbs_direction', 'thumbs_align', 'thumbs_type', 'thumbs_fillmode',
+		'scroll_direction', 'scroll_align', 'scroll_color',
+		'circletimer_color', 'timebar_align', 'timebar_color',
+		'slideinfo_direction', 'slideinfo_align',
+		'flickr_key', 'flickr_id', 'flickr_thumb_size', 'flickr_size', 'flickr_type',
+		'facebook_username', 'facebook_albumid', 'facebook_thumb_size', 'facebook_size', 'facebook_type',
+	);
+	foreach ( $js_string_vars as $js_string_var ) {
+		${$js_string_var} = esc_js( ${$js_string_var} );
+	}
 
 	// class names for master slider wrapper
 	$wrapper_classes = $class.' '.$template_class.' '.'ms-parent-id-'.$id;
@@ -523,7 +568,7 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 						grabCursor      : <?php msp_is_true_e($grab_cursor); ?>,
 						swipe           : <?php msp_is_true_e($swipe); ?>,
 						mouse           : <?php msp_is_true_e($mouse); ?>,
-						layout          : "<?php echo htmlspecialchars($layout); ?>",
+						layout          : "<?php echo $layout; ?>",
 						wheel           : <?php msp_is_true_e($wheel); ?>,
 						autoplay        : <?php msp_is_true_e($autoplay); ?>,
 						instantStartLayers:<?php msp_is_true_e( $instant_show_layers ); ?>,
@@ -535,17 +580,17 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
 						smoothHeight    : <?php msp_is_true_e($smooth_height); ?>,
 						endPause        : <?php msp_is_true_e($end_pause); ?>,
 						overPause       : <?php msp_is_true_e($over_pause); ?>,
-						fillMode        : "<?php echo htmlspecialchars($fill_mode); ?>",
+						fillMode        : "<?php echo $fill_mode; ?>",
 						centerControls  : <?php msp_is_true_e($center_controls); ?>,
 						startOnAppear   : <?php msp_is_true_e($start_on_appear); ?>,
-						layersMode      : "<?php echo htmlspecialchars($layers_mode); ?>",
+						layersMode      : "<?php echo $layers_mode; ?>",
 						hideLayers      : <?php msp_is_true_e($hide_layers); ?>,
 						fullscreenMargin: <?php echo (int) $fullscreen_margin;  ?>,
 						speed           : <?php echo (int)$speed; ?>,
-						dir             : "<?php echo htmlspecialchars($direction); ?>",
+						dir             : "<?php echo $direction; ?>",
 <?php if( 'staff-3' == $template      ) { echo "viewOption      : { centerSpace:1.6 },\n"; } ?>
-<?php if( 'off'     != $parallax_mode ) { echo "\t\t\t\t\t\tparallaxMode    : '" . htmlspecialchars( $parallax_mode ) . "',\n"; } ?>
-						view            : "<?php echo htmlspecialchars($view); ?>"
+<?php if( 'off'     != $parallax_mode ) { echo "\t\t\t\t\t\tparallaxMode    : '" . $parallax_mode . "',\n"; } ?>
+						view            : "<?php echo $view; ?>"
 				});
 
 				<?php
@@ -589,7 +634,7 @@ function msp_masterslider_wrapper_shortcode( $atts, $content = null ) {
                 }
 
 				if ( 'image-gallery' == $template ) {
-					printf( "new MSGallery( '%s' , %s).setup();", $puid, $instance_name );
+					printf( "new MSGallery( '%s' , %s).setup();", esc_js( $puid ), $instance_name );
 				}
 
 				if ( 'flickr' == $slider_type ) {
